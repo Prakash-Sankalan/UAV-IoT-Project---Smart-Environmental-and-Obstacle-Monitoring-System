@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Drone Dashboard</title>
+
+  <!-- Bootstrap and jQuery -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <!-- Google Fonts for Orbitron -->
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+
+  <!-- Custom Styling -->
+  <style>
+    /* Overall Page Style */
+    html, body {
+      height: 100%;
+      margin: 0;
+      font-family: 'Orbitron', sans-serif; /* Futuristic font for a drone-like theme */
+      background: url('https://img.freepik.com/premium-photo/photo-drone-flying-high-capturing-aerial-footage-scenic-landscape_1189966-17335.jpg') no-repeat center center fixed;
+      background-size: cover; /* Ensures the image covers the entire screen */
+      color: #ffffff;
+    }
+
+    /* Main Container Styling */
+    .container-fluid {
+      padding: 20px;
+    }
+
+    /* Dashboard Heading */
+    .well h2 {
+      font-size: 2.5em;
+      color: #00e6e6; /* Neon-like blue for titles */
+      text-align: center;
+      margin: 0;
+      padding: 10px;
+      background: rgba(0, 0, 0, 0.7); /* Transparent black for contrast */
+      border-radius: 10px;
+    }
+
+    /* Individual Data Boxes */
+    .well {
+      background: #003d4d; /* Deep blue for drone aesthetics */
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    }
+
+    .well h4 {
+      color: #00ffcc; /* Neon green for data titles */
+      text-align: center;
+    }
+
+    .well p {
+      font-size: 1.5em;
+      text-align: center;
+      margin-top: 10px;
+    }
+
+    /* Graph Containers */
+    .graph-container {
+      margin-top: 20px;
+      padding: 20px;
+      background: #002b3d; /* Dark background for contrast */
+      border-radius: 10px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+    }
+
+    .graph-container h4 {
+      color: #00e6e6; /* Neon blue for graph titles */
+      text-align: center;
+      margin-bottom: 10px;
+    }
+
+    /* Button and Tab Styling */
+    .btn {
+      background: #004466; /* Deep blue for buttons */
+      color: #ffffff;
+      border: none;
+      padding: 10px 20px;
+      font-size: 1.2em;
+      border-radius: 5px;
+      transition: all 0.3s ease;
+    }
+
+    .btn:hover {
+      background: #008cba; /* Bright blue hover effect */
+      color: #ffffff;
+      box-shadow: 0 4px 6px rgba(0, 139, 186, 0.5);
+    }
+
+    .nav-tabs > li > a {
+      background: #004466; /* Tab background */
+      color: #ffffff; /* Tab text color */
+      border-radius: 5px 5px 0 0;
+      transition: all 0.3s ease;
+    }
+
+    .nav-tabs > li.active > a, 
+    .nav-tabs > li > a:hover {
+      background: #008cba; /* Active tab background */
+      color: #ffffff;
+      border: none;
+    }
+
+    /* Chart Styling */
+    canvas {
+      background: #001a26; /* Dark background for the charts */
+      border-radius: 10px;
+      padding: 10px;
+    }
+
+    /* Footer Styling */
+    footer {
+      margin-top: 30px;
+      text-align: center;
+      color: #00ffcc; /* Neon green for footer */
+      font-size: 1.2em;
+    }
+
+    /* Intensity Display Styling */
+    .intensity-display {
+      font-size: 1.5em;
+      color: #fff;
+      font-weight: bold;
+      text-align: center;
+      padding: 15px;
+      border-radius: 10px;
+    }
+
+    .sufficient {
+      background-color: #4CAF50; /* Green for sufficient illumination */
+    }
+
+    .low {
+      background-color: #f44336; /* Red for low illumination */
+    }
+  </style>
+</head>
+<body>
+
+<div class="container-fluid">
+  <!-- Dashboard Header -->
+  <div class="well">
+    <h2>Drone Live Dashboard</h2>
+  </div>
+  
+  <!-- Data Display Section -->
+  <div class="row">
+    <div class="col-sm-3">
+      <div class="well">
+        <h4>Temperature (°C)</h4>
+        <p id="usersCount">Loading...</p> 
+      </div>
+    </div>
+    <div class="col-sm-3">
+      <div class="well">
+        <h4>Humidity (%)</h4>
+        <p id="pagesCount">Loading...</p> 
+      </div>
+    </div>
+    <div class="col-sm-3">
+      <div class="well">
+        <h4>Obstacle Distance (cm)</h4>
+        <p id="sessionsCount">Loading...</p> 
+      </div>
+    </div>
+    <div class="col-sm-3">
+      <div class="well">
+        <h4>Radar Angle (°)</h4>
+        <p id="bounceRate">Loading...</p> 
+      </div>
+    </div>
+    <div class="col-sm-3">
+      <div class="well">
+        <h4>Illumination</h4>
+        <p id="illuRate" class="intensity-display">Loading...</p> 
+      </div>
+    </div>
+  </div>
+
+  <!-- Graphs Section -->
+  <div class="row">
+    <div class="col-sm-6 graph-container">
+      <h4>Temperature Trend</h4>
+      <canvas id="tempChart" width="400" height="200"></canvas>
+    </div>
+    <div class="col-sm-6 graph-container">
+      <h4>Humidity Trend</h4>
+      <canvas id="humidityChart" width="400" height="200"></canvas>
+    </div>
+  </div>
+  
+  <!-- Ultrasonic Sensor Graphs -->
+  <div class="row">
+    <div class="col-sm-6 graph-container">
+      <h4>Ultrasonic Sensor - Distance</h4>
+      <canvas id="distanceChart" width="400" height="200"></canvas>
+    </div>
+    <div class="col-sm-6 graph-container">
+      <h4>Ultrasonic Sensor - Angle</h4>
+      <canvas id="angleChart" width="400" height="200"></canvas>
+    </div>
+  </div>
+</div>
+
+<footer>
+  &copy; 2024 Drone Monitoring System
+</footer>
+
+<script src="script.js"></script> <!-- External JS File -->
+
+</body>
+</html>
